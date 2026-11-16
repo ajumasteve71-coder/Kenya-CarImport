@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#0b3d2e" />
+<title>KenyaImport — Car Import Cost Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --green: #0b3d2e;
+    --green-2: #11624a;
+    --green-3: #1c8a68;
+    --mint: #e9f3ee;
+    --line: #d5e5dd;
+    --ink: #0d2119;
+    --muted: #5d7d70;
+    --amber: #b3701c;
+  }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f8f6;
+    color: var(--ink);
+    line-height: 1.45;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 16px; }
+
+  /* ---------- header ---------- */
+  .hero {
+    background: linear-gradient(160deg, #0b3d2e 0%, #11624a 100%);
+    color: #fff;
+    padding: 26px 0 32px;
+  }
+  .brand { font-weight: 800; font-size: 18px; letter-spacing: -0.02em; }
+  .brand span { color: #7fe0b6; }
+  .hero h1 { font-size: 25px; line-height: 1.15; margin: 14px 0 6px; letter-spacing: -0.02em; }
+  .hero p { margin: 0; font-size: 14px; color: #bfe4d4; }
+
+  /* ---------- cards ---------- */
+  .card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    margin: 14px 0;
+  }
+  .card h2 {
+    font-size: 12px;
+    margin: 0 0 12px;
+    color: var(--green);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+
+  /* ---------- fields ---------- */
+  .grid2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  input, select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--ink);
+    background: #fff;
+    -webkit-appearance: none;
+    appearance: none;
+    min-width: 0;
+  }
+  select {
+    background-image: linear-gradient(45deg, transparent 50%, var(--green) 50%),
+                      linear-gradient(135deg, var(--green) 50%, transparent 50%);
+    background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 34px;
+  }
+  input:focus, select:focus {
+    outline: 2px solid var(--green-3);
+    outline-offset: 1px;
+    border-color: var(--green-3);
+  }
+  .note { font-size: 12px; color: var(--muted); margin: 12px 0 0; }
+  .note strong { color: var(--green); }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    margin: 14px 0;
+    transition: transform 0.06s ease, opacity 0.15s ease;
+  }
+  .btn:active { transform: scale(0.99); }
+  .btn.primary { background: var(--green); color: #fff; }
+  .btn.ghost { background: #fff; color: var(--green); border: 1.5px solid var(--green); }
+
+  /* ---------- total card ---------- */
+  .total-card {
+    background: linear-gradient(160deg, #0b3d2e 0%, #11624a 100%);
+    border: none;
+    color: #fff;
+    padding: 20px 16px;
+  }
+  .total-card .label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #a8d8c5;
+  }
+  .total-kes {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-top: 6px;
+    word-break: break-word;
+  }
+  .total-usd { font-size: 15px; color: #bfe4d4; margin-top: 4px; }
+
+  /* ---------- tables ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 9px 0; text-align: left; border-bottom: 1px solid #eef5f1; vertical-align: top; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 10px; }
+  thead th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  tr.info td { color: var(--muted); font-size: 13px; }
+  tr.sub td { font-weight: 800; color: var(--green); }
+  tr.total td {
+    font-weight: 800;
+    color: var(--green);
+    font-size: 15px;
+    border-top: 2px solid var(--green);
+    border-bottom: none;
+    padding-top: 12px;
+  }
+  tr.hi td { background: #f2faf6; }
+
+  /* ---------- stats ---------- */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { background: var(--mint); border-radius: 12px; padding: 12px; min-width: 0; }
+  .stat .k {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 800;
+  }
+  .stat .v {
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--green);
+    letter-spacing: -0.02em;
+    margin: 3px 0;
+    word-break: break-word;
+  }
+
+  /* ---------- chart ---------- */
+  #chart { display: block; width: 100%; }
+
+  /* ---------- modal ---------- */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 30, 23, 0.55);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 50;
+    padding: 0;
+  }
+  .modal[hidden] { display: none; }
+  .modal-card {
+    background: #fff;
+    width: 100%;
+    max-width: 520px;
+    border-radius: 18px 18px 0 0;
+    padding: 20px 18px 26px;
+    max-height: 92vh;
+    overflow: auto;
+    position: relative;
+  }
+  @media (min-width: 620px) {
+    .modal { align-items: center; padding: 20px; }
+    .modal-card { border-radius: 18px; }
+  }
+  .modal-card h2 { font-size: 20px; margin: 0 0 4px; color: var(--green); letter-spacing: -0.02em; }
+  .modal-card .hint { font-size: 13px; color: var(--muted); margin: 0 0 16px; }
+  .close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: var(--mint);
+    color: var(--green);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .summary {
+    background: var(--mint);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 13px;
+    color: var(--green);
+    margin: 14px 0;
+    white-space: pre-line;
+    line-height: 1.5;
+  }
+
+  /* ---------- footer ---------- */
+  footer {
+    padding: 8px 16px 44px;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  footer strong { color: var(--green); }
+  footer .tiny { font-size: 11.5px; margin-top: 10px; color: #7b978c; }
+  footer p { margin: 8px 0; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brand">Kenya<span>Import</span></div>
+    <h1>Know the real cost before you import</h1>
+    <p>Landed cost in KSh, with every KRA tax, on one screen.</p>
+  </div>
+</header>
+
+<main class="wrap" id="calc">
+
+  <section class="card">
+    <h2>1 · The car</h2>
+    <div class="grid2">
+      <div class="field">
+        <label for="makeSel">Make</label>
+        <select id="makeSel"></select>
+      </div>
+      <div class="field">
+        <label for="modelSel">Model</label>
+        <select id="modelSel"></select>
+      </div>
+      <div class="field">
+        <label for="yearSel">Year of manufacture</label>
+        <select id="yearSel"></select>
+      </div>
+      <div class="field">
+        <label for="crsp">KRA CRSP value (KSh)</label>
+        <input id="crsp" type="number" inputmode="numeric" step="1" />
+      </div>
+    </div>
+    <p class="note">
+      CRSP is pre-filled from a <strong>sample table</strong> — replace it with the official
+      KRA CRSP figure for your exact car.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>2 · Engine</h2>
+    <div class="grid2">
+      <div class="field">
+        <label for="engineCc">Engine size (cc)</label>
+        <input id="engineCc" type="number" inputmode="numeric" step="any" />
+      </div>
+      <div class="field">
+        <label for="fuelSel">Fuel type</label>
+        <select id="fuelSel">
+          <option value="petrol">Petrol</option>
+          <option value="diesel">Diesel</option>
+          <option value="hybrid">Hybrid</option>
+          <option value="electric">Electric</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>3 · Purchase &amp; shipping (USD)</h2>
+    <div class="grid2">
+      <div class="field">
+        <label for="priceUsd">Car price FOB (USD)</label>
+        <input id="priceUsd" type="number" inputmode="decimal" step="any" />
+      </div>
+      <div class="field">
+        <label for="fx">USD → KES rate</label>
+        <input id="fx" type="number" inputmode="decimal" step="any" />
+      </div>
+      <div class="field">
+        <label for="shipUsd">Shipping (USD)</label>
+        <input id="shipUsd" type="number" inputmode="decimal" step="any" />
+      </div>
+      <div class="field">
+        <label for="insPct">Marine insurance (% of car price)</label>
+        <input id="insPct" type="number" inputmode="decimal" step="any" />
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>4 · Local fees (KSh)</h2>
+    <div class="grid2">
+      <div class="field">
+        <label for="feeClearing">Clearing agent</label>
+        <input id="feeClearing" type="number" inputmode="numeric" step="any" />
+      </div>
+      <div class="field">
+        <label for="feePort">Port charges</label>
+        <input id="feePort" type="number" inputmode="numeric" step="any" />
+      </div>
+      <div class="field">
+        <label for="feeKebs">KEBS fees</label>
+        <input id="feeKebs" type="number" inputmode="numeric" step="any" />
+      </div>
+      <div class="field">
+        <label for="feeNtsa">NTSA registration</label>
+        <input id="feeNtsa" type="number" inputmode="numeric" step="any" />
+      </div>
+      <div class="field">
+        <label for="feeTransport">Local transport</label>
+        <input id="feeTransport" type="number" inputmode="numeric" step="any" />
+      </div>
+    </div>
+    <p class="note">
+      These are <strong>placeholder defaults</strong>. Get real quotes from your clearing agent.
+    </p>
+  </section>
+
+  <button class="btn ghost" id="exampleBtn" type="button">
+    Try the example: 2024 Mercedes GLC 300
+  </button>
+
+  <section id="results">
+    <div class="card total-card">
+      <div class="label">Estimated landed cost</div>
+      <div class="total-kes" id="totalKes">KSh 0</div>
+      <div class="total-usd" id="totalUsd">≈ USD 0</div>
+    </div>
+
+    <div class="card">
+      <h2>Where the money goes</h2>
+      <canvas id="chart"></canvas>
+    </div>
+
+    <div class="card">
+      <h2>Key numbers</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="k">Total KRA taxes</div>
+          <div class="v" id="statTax">—</div>
+          <div class="k" id="statTaxPct">—</div>
+        </div>
+        <div class="stat">
+          <div class="k">Cost multiple</div>
+          <div class="v" id="statMultiple">—</div>
+          <div class="k">vs car purchase price</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Full breakdown</h2>
+      <table>
+        <tbody id="breakdown"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>What if the car price changes?</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Change</th>
+            <th class="num">FOB (USD)</th>
+            <th class="num">Landed (KSh)</th>
+          </tr>
+        </thead>
+        <tbody id="whatif"></tbody>
+      </table>
+    </div>
+
+    <button class="btn primary" id="quoteBtn" type="button">
+      Get a quote from an import agent
+    </button>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p>
+    <strong>Estimates only.</strong> KRA assesses each car at the port, so final taxes may differ.
+    Confirm with a licensed clearing agent before paying a deposit.
+  </p>
+  <p class="tiny">
+    All rates, the CRSP table and the fee defaults are constants at the top of this file.
+    The CRSP figures shipped with this app are <strong>SAMPLE values</strong>, not the official
+    KRA CRSP list. Values marked PLACEHOLDER must be verified before you rely on them.
+  </p>
+</footer>
+
+<!-- ======================= QUOTE MODAL ======================= -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="close" id="closeModal" type="button" aria-label="Close">×</button>
+    <h2 id="modalTitle">Get a quote</h2>
+    <p class="hint">We'll open WhatsApp with your car details already filled in.</p>
+
+    <div class="grid2">
+      <div class="field">
+        <label for="qName">Your name</label>
+        <input id="qName" type="text" autocomplete="name" placeholder="e.g. Jane W." />
+      </div>
+      <div class="field">
+        <label for="qPhone">Your WhatsApp number</label>
+        <input id="qPhone" type="tel" autocomplete="tel" placeholder="e.g. 0712 345 678" />
+      </div>
+    </div>
+
+    <div class="summary" id="qSummary"></div>
+
+    <a class="btn primary" id="waLink" href="#" target="_blank" rel="noopener">Open WhatsApp</a>
+    <p class="note" style="text-align:center;">
+      Nothing is sent until you press the button above.
+    </p>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =====================================================================
+     1. CONFIG — EDIT EVERYTHING IN THIS BLOCK
+     ===================================================================== */
+
+  // PLACEHOLDER — the import agent's WhatsApp number.
+  // International format, digits only, no "+" and no spaces.
+  var WHATSAPP_NUMBER = '254700000000';
+
+  // The year treated as "this year" when working out a car's age for the
+  // KRA depreciation table. Update it each January.
+  // Pinned to 2025 so the built-in Example (a 2024 car) reproduces the
+  // 20% depreciation used in the reference check.
+  var ASSESSMENT_YEAR = 2025;
+
+  // KRA tax rates. Verify against the current Finance Act / KRA guidance.
+  var KRA_RATES = {
+    importDuty: 0.35,        // 35% of customs value
+    vat: 0.16,               // 16% of (customs value + import duty + excise duty)
+    rdl: 0.02,               // Railway Development Levy — 2% of customs value
+    idf: 0.025,              // Import Declaration Fee — 2.5% of customs value
+    exciseByFuel: {          // Excise duty on (customs value + import duty)
+      petrol: 0.25,
+      diesel: 0.25,
+      hybrid: 0.25,          // PLACEHOLDER — verify
+      electric: 0.10         // PLACEHOLDER — electric is lower, verify exact rate
+    }
+  };
+
+  // PLACEHOLDER — "retail loading".
+  // The KRA CRSP is a retail (tax-inclusive) price, so the customs value is
+  // found by dividing the depreciated CRSP by the taxes baked into it:
+  //     divisor = (1 + duty) × (1 + excise) × (1 + VAT) × (1 + retailLoading)
+  // With the rates above this gives 1.35 × 1.25 × 1.16 × 1.25 = 2.446875,
+  // which reproduces the reference check in the brief.
+  // Verify the official KRA de-taxation method before launch.
+  var CRSP_RETAIL_LOADING = 0.25;
+
+  // Depreciation applied to the CRSP, by age in years.
+  // Key 6 means "6 years and over".
+  var DEPRECIATION_BY_AGE = {
+    1: 0.20,
+    2: 0.30,
+    3: 0.40,
+    4: 0.45,
+    5: 0.50,
+    6: 0.55
+  };
+
+  // PLACEHOLDER defaults for local fees, in KSh. Replace with real quotes.
+  var DEFAULT_FEES = {
+    clearingAgent: 60000,
+    portCharges: 55000,
+    kebs: 25000,
+    ntsaRegistration: 12000,
+    localTransport: 20000
+  };
+
+  // Defaults for the USD side.
+  var DEFAULT_USD = {
+    fxRate: 129.9,
+    shipping: 2200,
+    insurancePct: 1,
+    carPrice: 25000
+  };
+
+  // PLACEHOLDER CRSP TABLE — SAMPLE VALUES ONLY.
+  // Replace every number below with the official KRA CRSP for the model,
+  // year and variant. Format: crsp (KSh), cc, fuel.
+  var CRSP_TABLE = {
+    Toyota: {
+      'Harrier (XU60)':       { crsp: 6800000,  cc: 2000, fuel: 'petrol' },
+      'Land Cruiser Prado TX':{ crsp: 12500000, cc: 2800, fuel: 'diesel' },
+      'Axio':                 { crsp: 2600000,  cc: 1500, fuel: 'petrol' },
+      'Premio':               { crsp: 3100000,  cc: 1800, fuel: 'petrol' },
+      'RAV4':                 { crsp: 6200000,  cc: 2000, fuel: 'petrol' },
+      'Land Cruiser 300':     { crsp: 22000000, cc: 3500, fuel: 'diesel' }
+    },
+    Mercedes: {
+      'C200':                 { crsp: 9800000,  cc: 2000, fuel: 'petrol' },
+      'GLC 300 4MATIC Coupe': { crsp: 20362827, cc: 2000, fuel: 'petrol' },
+      'E250':                 { crsp: 12400000, cc: 2000, fuel: 'petrol' }
+    },
+    Subaru: {
+      'Forester':             { crsp: 5400000,  cc: 2000, fuel: 'petrol' },
+      'Outback':              { crsp: 6900000,  cc: 2500, fuel: 'petrol' },
+      'Impreza':              { crsp: 3300000,  cc: 1600, fuel: 'petrol' }
+    },
+    Nissan: {
+      'X-Trail':              { crsp: 5600000,  cc: 2000, fuel: 'petrol' },
+      'Note':                 { crsp: 2400000,  cc: 1200, fuel: 'petrol' }
+    },
+    Mazda: {
+      'CX-5':                 { crsp: 6100000,  cc: 2000, fuel: 'petrol' },
+      'Demio':                { crsp: 2200000,  cc: 1300, fuel: 'petrol' }
+    },
+    Honda: {
+      'Fit':                  { crsp: 2300000,  cc: 1300, fuel: 'petrol' },
+      'Vezel':                { crsp: 3400000,  cc: 1500, fuel: 'petrol' }
+    }
+  };
+
+  /* =====================================================================
+     2. HELPERS
+     ===================================================================== */
+
+  function $(id) { return document.getElementById(id); }
+
+  function num(id) {
+    var v = parseFloat($(id).value);
+    return isFinite(v) ? v : 0;
+  }
+
+  function fmtNum(n) {
+    if (!isFinite(n)) n = 0;
+    return Math.round(n).toLocaleString('en-US');
+  }
+
+  function fmtKes(n) { return 'KSh ' + fmtNum(n); }
+  function fmtUsd(n) { return 'USD ' + fmtNum(n); }
+
+  function pct(rate) {
+    return (rate * 100).toFixed(rate * 100 % 1 === 0 ? 0 : 1) + '%';
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    r = Math.min(r, h / 2, w / 2);
+    if (w <= 0 || h <= 0) return;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  /* =====================================================================
+     3. FORM SET-UP
+     ===================================================================== */
+
+  var OTHER_MODEL = '__other__';
+
+  function initForm() {
+    var makeSel = $('makeSel');
+    Object.keys(CRSP_TABLE).forEach(function (make) {
+      makeSel.add(new Option(make, make));
+    });
+
+    var yearSel = $('yearSel');
+    for (var y = 2026; y >= 2019; y--) {
+      yearSel.add(new Option(y, y));
+    }
+    yearSel.value = '2021';
+
+    // USD / fee defaults
+    $('fx').value = DEFAULT_USD.fxRate;
+    $('shipUsd').value = DEFAULT_USD.shipping;
+    $('insPct').value = DEFAULT_USD.insurancePct;
+    $('priceUsd').value = DEFAULT_USD.carPrice;
+
+    $('feeClearing').value = DEFAULT_FEES.clearingAgent;
+    $('feePort').value = DEFAULT_FEES.portCharges;
+    $('feeKebs').value = DEFAULT_FEES.kebs;
+    $('feeNtsa').value = DEFAULT_FEES.ntsaRegistration;
+    $('feeTransport').value = DEFAULT_FEES.localTransport;
+
+    fillModels();
+  }
+
+  function fillModels() {
+    var make = $('makeSel').value;
+    var modelSel = $('modelSel');
+    var models = CRSP_TABLE[make] || {};
+
+    modelSel.innerHTML = '';
+    Object.keys(models).forEach(function (m) {
+      modelSel.add(new Option(m, m));
+    });
+    modelSel.add(new Option('Other / not listed', OTHER_MODEL));
+
+    var first = Object.keys(models)[0];
+    if (first) modelSel.value = first;
+
+    applyModelDefaults();
+  }
+
+  function applyModelDefaults() {
+    var make = $('makeSel').value;
+    var model = $('modelSel').value;
+    var rec = (CRSP_TABLE[make] || {})[model];
+
+    if (rec) {
+      $('crsp').value = rec.crsp;
+      $('engineCc').value = rec.cc;
+      $('fuelSel').value = rec.fuel;
+    }
+    recalc();
+  }
+
+  /* =====================================================================
+     4. THE CALCULATION
+     ===================================================================== */
+
+  function readInputs() {
+    return {
+      make: $('makeSel').value,
+      model: $('modelSel').value,
+      year: parseInt($('yearSel').value, 10) || ASSESSMENT_YEAR,
+      crsp: num('crsp'),
+      cc: num('engineCc'),
+      fuel: $('fuelSel').value,
+      fobUsd: num('priceUsd'),
+      fx: num('fx') > 0 ? num('fx') : 1,
+      shipUsd: num('shipUsd'),
+      insPct: num('insPct'),
+      clearing: num('feeClearing'),
+      port: num('feePort'),
+      kebs: num('feeKebs'),
+      ntsa: num('feeNtsa'),
+      transport: num('feeTransport')
+    };
+  }
+
+  function calculate(inp, fobOverride) {
+    var fob = (typeof fobOverride === 'number') ? fobOverride : inp.fobUsd;
+
+    // --- age & depreciation -------------------------------------------
+    var age = Math.max(0, ASSESSMENT_YEAR - inp.year);
+    var depRate = 0;
+    if (age >= 1) {
+      depRate = DEPRECIATION_BY_AGE[Math.min(age, 6)];
+    }
+    var depCrsp = inp.crsp * (1 - depRate);
+
+    // --- customs value (CRSP with built-in taxes removed) --------------
+    var exciseRate = (KRA_RATES.exciseByFuel[inp.fuel] !== undefined)
+      ? KRA_RATES.exciseByFuel[inp.fuel]
+      : KRA_RATES.exciseByFuel.petrol;
+
+    var divisor = (1 + KRA_RATES.importDuty) *
+                  (1 + exciseRate) *
+                  (1 + KRA_RATES.vat) *
+                  (1 + CRSP_RETAIL_LOADING);
+
+    var customs = divisor > 0 ? depCrsp / divisor : 0;
+
+    // --- KRA taxes -----------------------------------------------------
+    var duty   = customs * KRA_RATES.importDuty;
+    var excise = (customs + duty) * exciseRate;
+    var vat    = (customs + duty + excise) * KRA_RATES.vat;
+    var rdl    = customs * KRA_RATES.rdl;
+    var idf    = customs * KRA_RATES.idf;
+    var kraTotal = duty + excise + vat + rdl + idf;
+
+    // --- other landed-cost items ---------------------------------------
+    var fobKes  = fob * inp.fx;
+    var shipKes = inp.shipUsd * inp.fx;
+    var insKes  = fob * (inp.insPct / 100) * inp.fx;
+    var feesTotal = inp.clearing + inp.port + inp.kebs + inp.ntsa + inp.transport;
+
+    var landed = fobKes + shipKes + insKes + kraTotal + feesTotal;
+
+    return {
+      age: age,
+      depRate: depRate,
+      depCrsp: depCrsp,
+      exciseRate: exciseRate,
+      divisor: divisor,
+      customs: customs,
+      duty: duty,
+      excise: excise,
+      vat: vat,
+      rdl: rdl,
+      idf: idf,
+      kraTotal: kraTotal,
+      fobKes: fobKes,
+      shipKes: shipKes,
+      insKes: insKes,
+      feesTotal: feesTotal,
+      landed: landed,
+      fob: fob,
+      fx: inp.fx,
+      shipUsd: inp.shipUsd
+    };
+  }
+
+  /* =====================================================================
+     5. RENDER
+     ===================================================================== */
+
+  function recalc() {
+    var inp = readInputs();
+    var c = calculate(inp);
+
+    /* ---- headline ---- */
+    $('totalKes').textContent = fmtKes(c.landed);
+    $('totalUsd').textContent = '≈ ' + fmtUsd(inp.fx > 0 ? c.landed / inp.fx : 0);
+
+    /* ---- key numbers ---- */
+    var taxShare = c.landed > 0 ? (c.kraTotal / c.landed) * 100 : 0;
+    var multiple = c.fobKes > 0 ? c.landed / c.fobKes : 0;
+
+    $('statTax').textContent = fmtNum(c.kraTotal);
+    $('statTaxPct').textContent = taxShare.toFixed(1) + '% of landed cost';
+    $('statMultiple').textContent = multiple.toFixed(2) + '×';
+
+    /* ---- full breakdown ---- */
+    var depLabel = (c.age <= 0)
+      ? 'Depreciated CRSP (no depreciation — current year)'
+      : 'Depreciated CRSP (−' + pct(c.depRate) + ' for ' + c.age +
+        ' year' + (c.age === 1 ? '' : 's') + ')';
+
+    var rows = [
+      { label: 'CRSP (KRA value, as entered)', v: inp.crsp, cls: 'info' },
+      { label: depLabel, v: c.depCrsp, cls: 'info' },
+      { label: 'Customs value (built-in taxes removed ÷ ' + c.divisor.toFixed(4) + ')',
+        v: c.customs, cls: 'info' },
+
+      { label: 'Import duty (' + pct(KRA_RATES.importDuty) + ')', v: c.duty },
+      { label: 'Excise duty (' + pct(c.exciseRate) + ' of customs + duty)', v: c.excise },
+      { label: 'VAT (' + pct(KRA_RATES.vat) + ')', v: c.vat },
+      { label: 'Railway Development Levy (' + pct(KRA_RATES.rdl) + ')', v: c.rdl },
+      { label: 'Import Declaration Fee (' + pct(KRA_RATES.idf) + ')', v: c.idf },
+      { label: 'Total KRA taxes', v: c.kraTotal, cls: 'sub hi' },
+
+      { label: 'Car price FOB (USD ' + fmtNum(c.fob) + ' @ ' + c.fx + ')', v: c.fobKes },
+      { label: 'Shipping (USD ' + fmtNum(c.shipUsd) + ')', v: c.shipKes },
+      { label: 'Marine insurance (' + inp.insPct + '% of car price)', v: c.insKes },
+      { label: 'Clearing agent', v: inp.clearing },
+      { label: 'Port charges', v: inp.port },
+      { label: 'KEBS fees', v: inp.kebs },
+      { label: 'NTSA registration', v: inp.ntsa },
+      { label: 'Local transport', v: inp.transport }
+    ];
+
+    var html = rows.map(function (r) {
+      return '<tr class="' + (r.cls || '') + '">' +
+             '<td>' + r.label + '</td>' +
+             '<td class="num">' + fmtNum(r.v) + '</td>' +
+             '</tr>';
+    }).join('');
+
+    html += '<tr class="total"><td>Total landed cost</td>' +
+            '<td class="num">' + fmtNum(c.landed) + '</td></tr>';
+
+    $('breakdown').innerHTML = html;
+
+    /* ---- what-if table ---- */
+    var steps = [-20, -15, -10, -5, 0, 5, 10, 15, 20];
+    var wi = steps.map(function (p) {
+      var fob = inp.fobUsd * (1 + p / 100);
+      var r = calculate(inp, fob);
+      var label = (p === 0 ? 'As entered' : (p > 0 ? '+' : '') + p + '%');
+      return '<tr class="' + (p === 0 ? 'sub' : '') + '">' +
+             '<td>' + label + '</td>' +
+             '<td class="num">$' + fmtNum(fob) + '</td>' +
+             '<td class="num">' + fmtNum(r.landed) + '</td>' +
+             '</tr>';
+    }).join('');
+    $('whatif').innerHTML = wi;
+
+    /* ---- chart ---- */
+    drawChart([
+      { label: 'Car price (FOB)', value: c.fobKes, color: '#0b3d2e' },
+      { label: 'Shipping + insurance', value: c.shipKes + c.insKes, color: '#1c8a68' },
+      { label: 'KRA taxes', value: c.kraTotal, color: '#b3701c' },
+      { label: 'Clearing + fees', value: c.feesTotal, color: '#8dc2ab' }
+    ]);
+  }
+
+  /* =====================================================================
+     6. CHART (plain canvas, no libraries)
+     ===================================================================== */
+
+  function drawChart(parts) {
+    var canvas = $('chart');
+    if (!canvas) return;
+
+    var total = parts.reduce(function (s, p) { return s + p.value; }, 0) || 1;
+    var max = Math.max.apply(null, parts.map(function (p) { return p.value; })) || 1;
+
+    var dpr = window.devicePixelRatio || 1;
+    var cssW = canvas.clientWidth || canvas.parentElement.clientWidth || 300;
+    var rowH = 46;
+    var cssH = parts.length * rowH;
+
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.height = cssH + 'px';
+
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+
+    parts.forEach(function (p, i) {
+      var y = i * rowH;
+
+      // label line
+      ctx.font = '700 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.textBaseline = 'top';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#5d7d70';
+      ctx.fillText(p.label + ' · ' + ((p.value / total) * 100).toFixed(0) + '%', 0, y + 2);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#0b3d2e';
+      ctx.fillText(fmtNum(p.value), cssW, y + 2);
+
+      // bar
+      var barY = y + 20;
+      var barH = 12;
+
+      ctx.fillStyle = '#e9f3ee';
+      roundRect(ctx, 0, barY, cssW, barH, 6);
+      ctx.fill();
+
+      var w = Math.max(4, (p.value / max) * cssW);
+      ctx.fillStyle = p.color;
+      roundRect(ctx, 0, barY, w, barH, 6);
+      ctx.fill();
+    });
+  }
+
+  /* =====================================================================
+     7. EXAMPLE BUTTON
+     ===================================================================== */
+
+  function loadExample() {
+    $('makeSel').value = 'Mercedes';
+    fillModels();
+    $('modelSel').value = 'GLC 300 4MATIC Coupe';
+    $('yearSel').value = '2024';
+    $('crsp').value = 20362827;
+    $('engineCc').value = 2000;
+    $('fuelSel').value = 'petrol';
+    $('priceUsd').value = 42000;
+    $('fx').value = 129.9;
+    $('shipUsd').value = 2200;
+    $('insPct').value = 1;
+
+    recalc();
+
+    $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* =====================================================================
+     8. QUOTE MODAL / WHATSAPP
+     ===================================================================== */
+
+  function carDescription(inp) {
+    var model = (inp.model === OTHER_MODEL) ? '(model not listed)' : inp.model;
+    return inp.year + ' ' + inp.make + ' ' + model +
+           ' — ' + inp.fuel + ', ' + inp.cc + 'cc';
+  }
+
+  function updateWaLink() {
+    var inp = readInputs();
+    var c = calculate(inp);
+    var name = $('qName').value.trim();
+    var phone = $('qPhone').value.trim();
+
+    var lines = [
+      'Hi, I would like a quote to import a car into Kenya.',
+      '',
+      'Name: ' + (name || '-'),
+      'My WhatsApp: ' + (phone || '-'),
+      'Car: ' + carDescription(inp),
+      'KRA CRSP used: KSh ' + fmtNum(inp.crsp),
+      'Car price FOB: USD ' + fmtNum(inp.fobUsd),
+      'Shipping: USD ' + fmtNum(inp.shipUsd),
+      'Estimated landed cost (KenyaImport): KSh ' + fmtNum(c.landed),
+      '',
+      'Please confirm the taxes and the final total before I pay a deposit.'
+    ];
+
+    $('waLink').href = 'https://wa.me/' + WHATSAPP_NUMBER +
+      '?text=' + encodeURIComponent(lines.join('\n'));
+  }
+
+  function openQuote() {
+    var inp = readInputs();
+    var c = calculate(inp);
+
+    $('qSummary').textContent =
+      carDescription(inp) + '\n' +
+      'CRSP: KSh ' + fmtNum(inp.crsp) + '\n' +
+      'FOB: USD ' + fmtNum(inp.fobUsd) + '  ·  Shipping: USD ' + fmtNum(inp.shipUsd) + '\n' +
+      'Estimated landed cost: KSh ' + fmtNum(c.landed);
+
+    $('modal').hidden = false;
+    document.body.style.overflow = 'hidden';
+    updateWaLink();
+  }
+
+  function closeQuote() {
+    $('modal').hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  /* =====================================================================
+     9. WIRING
+     ===================================================================== */
+
+  function bind() {
+    // dependent dropdowns
+    $('makeSel').addEventListener('change', fillModels);
+    $('modelSel').addEventListener('change', applyModelDefaults);
+
+    // live recalculation on every input in the calculator
+    var fields = document.querySelectorAll('#calc input, #calc select');
+    Array.prototype.forEach.call(fields, function (el) {
+      el.addEventListener('input', recalc);
+      el.addEventListener('change', recalc);
+    });
+
+    // buttons
+    $('exampleBtn').addEventListener('click', loadExample);
+    $('quoteBtn').addEventListener('click', openQuote);
+    $('closeModal').addEventListener('click', closeQuote);
+    $('modal').addEventListener('click', function (e) {
+      if (e.target === $('modal')) closeQuote();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !$('modal').hidden) closeQuote();
+    });
+
+    // whatsapp message updates as the user types
+    $('qName').addEventListener('input', updateWaLink);
+    $('qPhone').addEventListener('input', updateWaLink);
+
+    // chart is canvas — redraw when the viewport changes
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(recalc, 150);
+    });
+  }
+
+  /* =====================================================================
+     10. GO
+     ===================================================================== */
+
+  initForm();
+  bind();
+  recalc();
+})();
+</script>
+</body>
+</html>
