@@ -429,7 +429,7 @@
     <div class="grid2">
       <div class="field">
         <label for="qName">Your name</label>
-        <input id="qName" type="text" autocomplete="name" placeholder="e.g. Jane W." />
+        <input id="qName" type="text" autocomplete="name" placeholder="e.g. John Doe." />
       </div>
       <div class="field">
         <label for="qPhone">Your WhatsApp number</label>
@@ -456,7 +456,7 @@
 
   // PLACEHOLDER — the import agent's WhatsApp number.
   // International format, digits only, no "+" and no spaces.
-  var WHATSAPP_NUMBER = '254700000000';
+  var WHATSAPP_NUMBER = '254769949771';
 
   // The year treated as "this year" when working out a car's age for the
   // KRA depreciation table. Update it each January.
@@ -525,17 +525,22 @@
       'Axio':                 { crsp: 2600000,  cc: 1500, fuel: 'petrol' },
       'Premio':               { crsp: 3100000,  cc: 1800, fuel: 'petrol' },
       'RAV4':                 { crsp: 6200000,  cc: 2000, fuel: 'petrol' },
+     'LX600':                  { crsp: 12500000, cc: 2800, fuel: 'diesel' },
       'Land Cruiser 300':     { crsp: 22000000, cc: 3500, fuel: 'diesel' }
     },
     Mercedes: {
       'C200':                 { crsp: 9800000,  cc: 2000, fuel: 'petrol' },
       'GLC 300 4MATIC Coupe': { crsp: 20362827, cc: 2000, fuel: 'petrol' },
-      'E250':                 { crsp: 12400000, cc: 2000, fuel: 'petrol' }
+      'E250':                 { crsp: 12400000, cc: 2000, fuel: 'petrol' },
+      'GLE400d':              { crsp: 20362827, cc: 2000, fuel: 'diesel' },
+      'GLC220d':             { crsp: 20362827, cc: 2000, fuel: 'diesel' },
+      'GLC53':             { crsp: 20362827, cc: 2000, fuel: 'petrol' }
     },
     Subaru: {
       'Forester':             { crsp: 5400000,  cc: 2000, fuel: 'petrol' },
       'Outback':              { crsp: 6900000,  cc: 2500, fuel: 'petrol' },
-      'Impreza':              { crsp: 3300000,  cc: 1600, fuel: 'petrol' }
+      'Impreza':              { crsp: 3300000,  cc: 1600, fuel: 'petrol' },
+     'Legacy':              { crsp: 3300000,  cc: 1600, fuel: 'petrol' }
     },
     Nissan: {
       'X-Trail':              { crsp: 5600000,  cc: 2000, fuel: 'petrol' },
@@ -543,7 +548,10 @@
     },
     Mazda: {
       'CX-5':                 { crsp: 6100000,  cc: 2000, fuel: 'petrol' },
-      'Demio':                { crsp: 2200000,  cc: 1300, fuel: 'petrol' }
+      'Demio':                { crsp: 2200000,  cc: 1300, fuel: 'petrol' },
+      'CX-3':                 { crsp: 6100000,  cc: 1500, fuel: 'petrol' },
+      'Atenza':                 { crsp: 6100000,  cc: 1500, fuel: 'petrol' },
+      'Axela':                 { crsp: 2200000,  cc:  1300, fuel: 'petrol' }
     },
     Honda: {
       'Fit':                  { crsp: 2300000,  cc: 1300, fuel: 'petrol' },
